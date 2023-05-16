@@ -5,8 +5,9 @@
                     <!--banner轮播-->
                     <div class="swiper-container" id="mySwiper" >
                         <div class="swiper-wrapper" >
-                            <div class="swiper-slide">
-                                <img src="./images/home/banner1.jpg" />
+                          <!-- carousel意为轮播图 -->
+                            <div class="swiper-slide" v-for="(carousel,index) in bannerList" :key="carousel.id">
+                                <img :src="carousel.imgUrl" />
                             </div>
                             <!-- <div class="swiper-slide">
                                 <img src="./images/home/banner2.jpg" />
@@ -106,12 +107,26 @@
                     </div>
                 </div>
             </div>
-        </div>
+</div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
-    name:"ListContainer"
+    name:"",
+    //组件挂载完毕后
+    mounted() {
+      //派发action:通过vuex发起ajax请求，将数组存储在仓库中
+      this.$store.dispatch('getBannerList')
+           
+    },
+    computed:{
+      ...mapState({
+        bannerList:state=>state.home.bannerList
+        // bannerList:'bannerList'
+      })
+    }
 };
 </script>
 
