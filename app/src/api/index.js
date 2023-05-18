@@ -11,29 +11,10 @@ export const reqCategoryList = () => requests({method:'get',url: '/product/getBa
 
 
 //获取首页轮播图数据的接口
-export const reqBannerList = () => mockRequests({method: 'get',url: '/banner'});
+export const reqBannerList = () => mockRequests.get('/banner')
 
-
-//获取Floor数据接口
-// export const reqFloorList = ()=>mockRequests({url:'/floor',method:'get'});
-
-//搜索模块的请求接口函数:
-//将来根据不同的搜索条件,需要给服务器携带不同的参数
-//请求体携带搜索的参数
-//搜索的条件:它应该是一个对象10K,可有可无，但是data至少是一个空对象
-//没有发现:
-//第一步:整理搜索的参数
-//第二步：根据最新的搜索参数，获取最新的数据展示!!
-// export const reqSearchList = (data)=>requests({url:'/list',method:'post',data})
-
-
-
-//详情模块商品的数据
-// export const reqDetailList = (skuId)=>requests({url:`/item/${skuId}`,method:'get'});
-
-
-//加入购物车|将来修改商品个数的接口
-// export const reqAddOrUpdateCart = (skuId,skuNum)=>requests({url:`/cart/addToCart/${skuId}/${skuNum}`,method:'post'});
+//获取floor数据
+export const reqFloorList=()=>mockRequests.get('/floor')
 
 
 

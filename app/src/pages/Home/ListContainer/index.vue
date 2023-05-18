@@ -3,21 +3,12 @@
             <div class="sortList clearfix">
                 <div class="center" >
                     <!--banner轮播-->
-                    <div class="swiper-container" id="mySwiper" >
+                    <div class="swiper-container" ref="mySwiper" >
                         <div class="swiper-wrapper" >
                           <!-- carousel意为轮播图 -->
                             <div class="swiper-slide" v-for="(carousel,index) in bannerList" :key="carousel.id">
                                 <img :src="carousel.imgUrl" />
                             </div>
-                            <!-- <div class="swiper-slide">
-                                <img src="./images/home/banner2.jpg" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="./images/home/banner3.jpg" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="./images/home/banner4.jpg" />
-                            </div> -->
                         </div>
                         <!-- 如果需要分页器 -->
                         <div class="swiper-pagination"></div>
@@ -112,6 +103,10 @@
 
 <script>
 import { mapState } from 'vuex';
+import Swiper from "swiper";
+//swiper使用步骤
+//第一步：引入依赖包、样式
+//入口文件引入样式
 
 export default {
     name:"",
@@ -119,14 +114,93 @@ export default {
     mounted() {
       //派发action:通过vuex发起ajax请求，将数组存储在仓库中
       this.$store.dispatch('getBannerList')
-           
+      //在new Swiper 实例之前。页面中的结构必须有  所以将new Swiper实例放在mounted不可以
+      //因为dispatch当中涉及到异步语句结构，导致v-for遍历的时候结构还不完整
+      // setTimeout(()=>{
+      //    //当页面中的结构已经有了的情况下，再初始化swiper
+      //           var mySwiper = new Swiper(document.querySelector(".swipe-container"), {
+      //           // direction: 'vertical', // 垂直切换选项
+      //           loop: true, // 循环模式选项
+                
+      //           // 如果需要分页器
+      //           pagination: {
+      //             el: '.swiper-pagination',
+      //             clickable:true,
+      //           },
+                
+      //           // 如果需要前进后退按钮
+      //           navigation: {
+      //             nextEl: '.swiper-button-next',
+      //             prevEl: '.swiper-button-prev',
+      //           },
+      //         })        
+      // },1000)
     },
     computed:{
       ...mapState({
-        bannerList:state=>state.home.bannerList
+        bannerList:(state)=>state.home.bannerList
         // bannerList:'bannerList'
       })
-    }
+    },
+    //监听已有数据的变化
+    watch: {
+      //监听bannerList数据的变化，这条数据发生过变化----由空数组变为数组里有四个元素
+      //但没办法保证v-for遍历完了
+        bannerList() {
+          //能在这里直接初始化Swiper类的实例吗?
+          //不能在当前状态直接初始化Swiper类的实例,因为这里只能保证数据发生变化了[服务器数据回来了],
+          //但是你不能保证v-for遍历的结构完事了.
+
+          //nextTick 在下次DOM更新循环结束后执行延迟回调，在修改数据之后立即执行这个方法，获取更新后的DOM
+          this.$nextTick(() => {
+            //初始化Swiper类的实例
+            //this.$refs获取元素
+            var mySwiper = new Swiper(this.$refs.mySwiper,
+            {
+              //设置轮播图防线
+              direction: "horizontal",
+              //开启循环模式
+              loop: true,
+              // 如果需要分页器
+              pagination: {
+                el: ".swiper-pagination",
+                //分页器类型
+                type: "bullets",
+                //点击分页器，切换轮播
+                clickable: true,
+              },
+              //自动轮播
+              autoplay: {
+                delay: 1000,
+                //新版本的写法：目前是5版本
+                // pauseOnMouseEnter: true,
+                //如果设置为true，当切换到最后一个slide时停止自动切换
+                stopOnLastSlide: true,
+                //用户操作swiper之后，是否禁止autoplay
+                disableOnInteraction: false,
+              },
+              // 如果需要前进后退按钮
+              navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+              },
+              //切换效果
+              // effect: "cube",
+            });
+
+            //1:swiper插件,对外暴露一个Swiper构造函数
+            //2:Swiper构造函数需要传递参数 1、结构总根节点CSS选择器|根节点真实DOM节点  2、轮播图配置项
+            //鼠标进入停止轮播
+            mySwiper.el.onmouseover = function () {
+              mySwiper.autoplay.stop();
+            };
+            //鼠标离开开始轮播
+            mySwiper.el.onmouseout = function () {
+              mySwiper.autoplay.start();
+            };
+          });
+        },
+  },
 };
 </script>
 
