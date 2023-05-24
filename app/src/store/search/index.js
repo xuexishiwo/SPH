@@ -22,8 +22,15 @@ const actions={
 //getters的作用：简化仓库中的数据，方便组件获取数据
 const getters={
     //当前形参，当前仓库中的state，并非大仓库中的state
-    goodsList(){       
-    }
+    goodsList(state){
+        return state.searchList.goodsList       
+    },
+    trademarkList(state){
+        return state.searchList.trademarkList;
+    },
+    attrsList(state){
+        return state.searchList.attrsList
+    },
 };
 
 export default{

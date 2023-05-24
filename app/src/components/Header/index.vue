@@ -49,11 +49,11 @@
 
 <script>
 export default {
-  name:"",
+  name:"Header",
   data(){
     return{
-      keyword:''
-      }
+      keyword:"",
+      };
   },
   methods: {
     //第一种，字符串形式
@@ -79,14 +79,28 @@ export default {
     //搜索按钮回调函数:需要向search路由进行跳转
     goSearch(){
       //代表的是如果有query参数也带过去
-       let location={name: "search",params: {keyword: this.keyword||undefined }};
+       let locations={
+       name: "search",
+       params: {keyword: this.keyword||undefined }
+       };
         
-      if(this.$route.query){
-        location.query=this.$route.query,
-        this.$router.push(location)
-        }
+      if (this.$route.query.categoryName) {
+        locations.query = this.$route.query;
       }
-    }   
+      this.$router.push(locations);
+      },
+      logout(){
+       //派遣action退出登录
+       this.$store.dispatch('logout');
+    },
+    },  
+  mounted() {
+      //清除关键字
+      //在main.js中建立全局事件总线
+      this.$bus.$on("clear", () => { 
+        this.keyword = "";
+      });
+  },
   }
 
 </script>
