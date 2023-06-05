@@ -12,12 +12,15 @@
         <a href="javascript:void(0);">更多</a>
       </div>
     </div>
+    <!-- 平台售卖属性的地方 -->
     <div class="type-wrap" v-for="(attr,index) in attrsList" :key="attr.id">
+      <!-- 比如颜色 -->
       <div class="fl key">{{attr.attrName}}</div>
       <div class="fl value">
         <ul class="type-list">
-          <li v-for="(attrValue,index) in attr.attrValueList" :key="index">
-            <a>{{attrValue}}</a>
+          <!-- 红色、蓝色 -->
+          <li v-for="(attrValue,index) in attr.attrValueList" :key="index" >
+            <a @click="attrInfo(attr,attrValue)">{{attrValue}}</a>
           </li>
          
         </ul>
@@ -42,7 +45,9 @@
         //因为父组件中searchParams参数是带给服务器参数，子组件把点击的品牌的信息，给父组件传递过去---自定义事件
         // console.log(trademark)
         this.$emit('trademarkInfo',trademark)
-        
+      },
+      attrInfo(attr,attrValue){
+         this.$emit("attrInfo",attr,attrValue);
       }
     },
   }

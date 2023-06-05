@@ -18,45 +18,39 @@
             <li class="with-x" v-if="searchParams.keyword">{{searchParams.keyword}}<i @click="removekeyword">×</i></li>
             <!-- 品牌的面包屑 -->
             <li class="with-x" v-if="searchParams.trademark">{{searchParams.trademark.split(":")[1]}}<i @click="removeTrademark">×</i></li>
+            <!-- 平台的售卖属性的面包屑 -->
+            <li class="with-x" v-for="(attrValue,index) in searchParams.props" :key="index">{{attrValue.split(":")[1]}}<i @click="removeAttrValue(index)">×</i></li>
           </ul>
         </div>
 
         <!--selector-->
-        <SearchSelector @trademarkInfo="trademarkInfo"/>
+        <SearchSelector @trademarkInfo="trademarkInfo" @attrInfo="attrInfo"/>
 
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{active:isOne}" @click="changeOrder(1)">
+                  <a>综合<span v-show="isOne"><span v-show="isUp">↑</span><span v-show="isDown">↓</span></span></a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{active:isTwo}" @click="changeOrder(2)">
+                  <a>价格<span v-show="isTwo"><span v-show="isUp">↑</span><span v-show="isDown">↓</span></span></a>
                 </li>
               </ul>
             </div>
           </div>
-          <!-- 销售产品列表 -->
+          <!-- 销售产品列表 测试分页器阶段，这里的数据将来需要替换的-->
           <div class="goods-list">
             <ul class="yui3-g">
               <li class="yui3-u-1-5" v-for="(good,index) in goodsList" :key="good.id" >
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank"><img :src="good.defaultImg"/></a>
+                    <!-- 有router-Link就必须有to  为了动态传参，需要 : + (模板字符串)` `-->
+                    <!-- 在路由跳转的时候，不要忘记带id(params)参数 -->
+                    <router-link :to="`/detail/${good.id}`">
+                       <img :src="good.defaultImg"/>
+                    </router-link>  
                   </div>
                   <div class="price">
                     <strong>
@@ -79,7 +73,10 @@
 
             </ul>
           </div>
-          <div class="fr page">
+
+          <!-- 分页器 -->
+          <Pagination :pageNo="searchParams.pageNo" :pageSize="searchParams.pageSize" :total="total" :continues="5" @getPageNo="getPageNo"/>
+          <!-- <div class="fr page">
             <div class="sui-pagination clearfix">
               <ul>
                 <li class="prev disabled">
@@ -107,7 +104,7 @@
               </ul>
               <div><span>共10页&nbsp;</span></div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -116,7 +113,7 @@
 
 <script>
   import SearchSelector from './SearchSelector/SearchSelector'
-  import {mapGetters} from 'vuex';
+  import {mapGetters,mapState} from 'vuex';
   export default {
     name: 'Search',
     //引入组件
@@ -156,9 +153,26 @@
     },
     //捞数据
     computed:{
-      ...mapGetters([
-         'goodsList' 
-      ])
+      ...mapGetters(['goodsList']),
+      //获取search模块展示产品一共多少数据
+      ...mapState({
+        total:state=>state.search.searchList.total
+      }),
+      isOne(){
+       return this.searchParams.order.indexOf('1')!=-1
+      },
+      isTwo(){
+       return this.searchParams.order.indexOf('2')!=-1
+      },
+      isUp(){
+        return this.searchParams.order.indexOf('asc')!=-1
+      },
+      isDown(){
+        return this.searchParams.order.indexOf('desc')!=-1
+      },
+     
+     
+      
     },
     methods: {
       getData(){
@@ -202,6 +216,49 @@
       removeTradeMark(){
         //将品牌信息置空
         this.searchParams.trademark=undefined;
+        //再次发请求
+        this.getData();
+      },
+      //删除售卖属性
+      removeAttrValue(index){
+        //再次整理参数
+        this.searchParams.props.splice(index,1);
+        //再次发请求
+        this.getData();
+      },
+      attrInfo(attr,attrValue){
+        let props=`${attr.attrId}:${attrValue}:${attr.attrName}`;
+        if(this.searchParams.props.indexOf(props)==-1){
+          this.searchParams.props.push(props);
+        }
+        
+        //再次发请求
+        this.getData();
+      },
+      //排序的操作
+      changeOrder(flag){
+        //flag形参，是一个标记，代表用户点击的是综合（1）还是价格（2），用户点击的时候传送进来的
+       let originSort=this.searchParams.order.split(":")[1];
+       let newOrder='';
+      //点击的是综合
+       if(flag==1){
+        newOrder=`${flag}:${originSort=="desc"?"asc":"desc"}`
+       }else if(flag==2){
+        newOrder=`${flag}:${originSort=="desc"?"asc":"desc"}`
+       }
+      //  else{
+      // //点击的是价格
+      //  originSort=="desc"?"asc":"desc"
+      //  }
+       //将新的order赋予searchParams
+       this.searchParams.order=newOrder;
+       //再次发请求
+       this.getData();
+      },
+       //这是自定义事件的回调函数
+      getPageNo(pageNo){
+        //整理带给服务器参数
+        this.searchParams.pageNo=pageNo;
         //再次发请求
         this.getData();
       }
